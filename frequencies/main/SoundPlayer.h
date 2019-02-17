@@ -9,5 +9,8 @@ class SoundController {
   DFRobotDFPlayerMini myDFPlayer;
   public:
   SoundController(SoftwareSerial softSerial);
-  SoundController(int RXpin, int TXpin, int baudrate);
+  SoundController(int RXpin, int TXpin, unsigned int baudrate);
+  void play(uint16_t number);
+  void playLoop(uint16_t number);
+  void volume(uint8_t number);
 };

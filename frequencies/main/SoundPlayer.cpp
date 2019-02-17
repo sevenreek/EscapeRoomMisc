@@ -1,13 +1,31 @@
-#include "Potentiometer.h"
-float KnobController::getCurrentPosition()
+#include "SoundPlayer.h"
+SoundController::SoundController(SoftwareSerial softSerial)
 {
-    int currentPosition;
-    currentPosition = analogRead(analogPin);
-    return (float)(currentPosition-minAnalog)/(maxAnalogRelative);
+  if(!(this->myDFPlayer.begin(softSerial)))
+  {
+    Serial.println("Failed to initialze MP3 module!");
+  }
+  myDFPlayer.setTimeOut(500);
 }
-KnobController::KnobController(int analogPin, int minAnalog, int maxAnalog)
+SoundController::SoundController(int RXpin, int TXpin, unsigned int baudrate)
 {
-  this->minAnalog = minAnalog;
-  this->maxAnalogRelative = maxAnalog-minAnalog;
-  this->analogPin = analogPin;
-} 
+  SoftwareSerial softSerial(RXpin,TXpin);
+  softSerial.begin(baudrate);
+  if(!(this->myDFPlayer.begin(softSerial)))
+  {
+    Serial.println("Failed to initialze MP3 module!");
+  }
+  this->myDFPlayer.setTimeOut(500);
+}
+void SoundController::play(uint16_t number)
+{
+  this->myDFPlayer.play(number);
+}
+void SoundController::playLoop(uint16_t number)
+{
+  this->myDFPlayer.loop(number);
+}
+void SoundController::volume(uint8_t number)
+{
+  this->myDFPlayer.volume(number);
+}

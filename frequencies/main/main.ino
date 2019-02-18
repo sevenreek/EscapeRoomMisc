@@ -1,3 +1,7 @@
+/**
+ * This version is created with connections on the Arduino Pro Mini 3.3V 
+ * 
+ */
 #include "Potentiometer.h"
 #include "SoundPlayer.h"
 #include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
@@ -17,10 +21,11 @@
 #define RADIO_CHATTER0 (2)
 #define RADIO_CHATTER1 (1)
 /* PIN DEFINITIONS */
-#define ARDUINO_TX_PIN (14) // Arduino pin used as the software transimtter. Connect to the mp3 module RX pin.
-#define ARDUINO_RX_PIN (15) // Arduino pin used as the software reciever. Connect to the mp3 module TX pin. Not actually necessary, as no data is read from the mp3 module atm.
-#define ARDUINO_VOLUME_PIN (A4) // used for volume control
-#define FLOATING_ANALOG_PIN (A5) // used for random seed
+#define ARDUINO_TX_PIN (11) // Arduino pin used as the software transimtter. Connect to the mp3 module RX pin.
+#define ARDUINO_RX_PIN (10) // Arduino pin used as the software reciever. Connect to the mp3 module TX pin. Not actually necessary, as no data is read from the mp3 module atm.
+#define ARDUINO_VOLUME_PIN (A6) // used for volume control
+#define FLOATING_ANALOG_PIN (A7) // used for random seed
+#define ARDUINO_SDA_PIN (0x70) // A4 - SDA; A5 - SCL
 /* SOFTWARE SERIAL DEFINITIONS */
 #define SSERIAL_BAUDRATE 9600
 /* CONSTANTS */
@@ -50,7 +55,7 @@ void setup() {
     knobReaders[i] = new KnobController(knobPins[i],knobMins[i],knobMaxes[i]);
   }
   volumeReader = new KnobController(ARDUINO_VOLUME_PIN,0,1024);
-  matrix.begin(0x70);
+  matrix.begin(ARDUINO_SDA_PIN);
   int readVolume = volumeReader->getCurrentPosition()*30; 
   lastReadVolume = readVolume;
   soundPlayer->volume( readVolume);

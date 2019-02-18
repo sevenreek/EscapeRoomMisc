@@ -19,7 +19,8 @@
 /* PIN DEFINITIONS */
 #define ARDUINO_TX_PIN (14) // Arduino pin used as the software transimtter. Connect to the mp3 module RX pin.
 #define ARDUINO_RX_PIN (15) // Arduino pin used as the software reciever. Connect to the mp3 module TX pin. Not actually necessary, as no data is read from the mp3 module atm.
-#define FLOATING_ANALOG_PIN A4 // used for random seed
+#define ARDUINO_VOLUME_PIN (A4) // used for volume control
+#define FLOATING_ANALOG_PIN (A5) // used for random seed
 /* SOFTWARE SERIAL DEFINITIONS */
 #define SSERIAL_BAUDRATE 9600
 /* CONSTANTS */
@@ -32,7 +33,9 @@ const uint16_t MIN_FREQUENCY = 0; // minimum frequency -||-
 uint16_t correctFrequencies[CORRECT_FREQUENCY_COUNT] = {7982,3456,1024}; // Frequency index (first element's index is 0) has to correspond to the MP3 file definition of index+1(second frequency will play the sound defined as (2))
 uint8_t currentPlayedSound = RADIO_NOISE;
 uint16_t currentFrequency;
+int lastReadVolume;
 KnobController * knobReaders[KNOB_COUNT];
+KnobController * volumeReader;
 Adafruit_7segment matrix = Adafruit_7segment();
 SoundController * soundPlayer = NULL;
 /* FUNCTION PROTOTYPES */
@@ -46,8 +49,11 @@ void setup() {
   {
     knobReaders[i] = new KnobController(knobPins[i],knobMins[i],knobMaxes[i]);
   }
+  volumeReader = new KnobController(ARDUINO_VOLUME_PIN,0,1024);
   matrix.begin(0x70);
-  soundPlayer->volume(0);
+  int readVolume = volumeReader->getCurrentPosition()*30; 
+  lastReadVolume = readVolume;
+  soundPlayer->volume( readVolume);
   soundPlayer->playLoop(RADIO_NOISE); // starts with radio noise playing
 }
 
@@ -69,6 +75,13 @@ void loop() {
   }
   Serial.print("\n\r");
   #else // end of debug configuration code
+  int readVolume = volumeReader->getCurrentPosition()*30; 
+  //Serial.println(readVolume);
+  if(readVolume!=lastReadVolume)
+  {
+    soundPlayer->volume( readVolume);
+    lastReadVolume = readVolume;
+  }
   int i;
   currentFrequency = 0;
   for(i=0;i<KNOB_COUNT;i++)
@@ -95,7 +108,7 @@ void loop() {
         soundPlayer->playLoop(i+1);
         currentPlayedSound = i+1;
       }
-      Serial.print("Matching frequency number ");Serial.println(i);
+      //Serial.print("Matching frequency number ");Serial.println(i);
     }
   }
   if(!isCorrectFrequency && currentPlayedSound!=RADIO_NOISE)

@@ -5,6 +5,10 @@ float KnobController::getCurrentPosition()
     currentPosition = analogRead(analogPin);
     return (float)(currentPosition-minAnalog)/(maxAnalogRelative);
 }
+int KnobController::getCurrentRawPosition()
+{
+    return analogRead(analogPin);
+}
 KnobController::KnobController(int analogPin, int minAnalog, int maxAnalog)
 {
   this->minAnalog = minAnalog;

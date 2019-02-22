@@ -1,21 +1,16 @@
 #include "SoundPlayer.h"
 SoundController::SoundController(NeoSWSerial softSerial)
 {
-  if(!(this->myDFPlayer.begin(softSerial)))
-  {
-    Serial.println("Failed to initialze MP3 module!");
-  }
-  myDFPlayer.setTimeOut(500);
+this->myDFPlayer.begin(softSerial);
+  
+  //myDFPlayer.setTimeOut(500);
 }
 SoundController::SoundController(int RXpin, int TXpin, unsigned int baudrate)
 {
   NeoSWSerial softSerial(RXpin,TXpin);
   softSerial.begin(baudrate);
-  if(!(this->myDFPlayer.begin(softSerial)))
-  {
-    Serial.println("Failed to initialze MP3 module!");
-  }
-  this->myDFPlayer.setTimeOut(500);
+  this->myDFPlayer.begin(softSerial);
+  //this->myDFPlayer.setTimeOut(500);
 }
 void SoundController::play(uint16_t number)
 {

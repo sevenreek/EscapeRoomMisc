@@ -3,10 +3,11 @@
 #include "Arduino.h"
 #endif
 #include <NeoSWSerial.h>
-#include "DFRobotDFPlayerMini.h"
+#include "DFPlayerMini_Fast.h"
+
 class SoundController {
   private:
-  DFRobotDFPlayerMini myDFPlayer;
+  DFPlayerMini_Fast myDFPlayer;
   public:
   SoundController(NeoSWSerial softSerial);
   SoundController(int RXpin, int TXpin, unsigned int baudrate);

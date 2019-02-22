@@ -62,8 +62,8 @@ void setup() {
   }
   volumeReader = new KnobController(ARDUINO_VOLUME_PIN,0,1024);
   matrix.begin(ARDUINO_SDA_PIN);
-  Serial.println("Starting board...");
-   soundPlayer->playLoop(RADIO_NOISE); // starts with radio noise playing
+  matrix.clear();
+  matrix.writeDisplay();
 }
 
 void loop() {
@@ -74,27 +74,19 @@ void loop() {
     uint8_t comparisonResult = 1;
     if(result == RESULT_SUCCESS)
     {
-      Serial.println("Found device. Checking serial...");
+      
       comparisonResult = memcmp(data,CORRECT_DS2401,sizeof(CORRECT_DS2401));
     }
     else
     {
-      Serial.println("Device not found.");
       return;
     }
     if(comparisonResult == 0)
     {
-      Serial.println("Success. Device matching. Playing sound...");
-      delay(200);
       connectedBattery = true;
       soundPlayer->playLoop(RADIO_NOISE); // starts with radio noise playing
-      
     }
-    else
-      Serial.println("Serial incorrect.");
   }
-  Serial.println("Continuing");
-  delay(1000);
   int readVolume = volumeReader->getCurrentPosition()*30; 
   if(readVolume!=lastReadVolume)
   {

@@ -1,15 +1,24 @@
 
 #include "SPI.h" 
 #include "MFRC522.h" 
-#define DUMPCARDID true // set to true to print found card id in serial monitor, set to false for normal operation
-#define ONSOLVE_PIN 13 // pin to change state when correct card is detected.
+/**
+ * CONNECTION:
+ * RST -> pinRST(def. 9)
+ * MISO -> 12
+ * MOSI -> 11
+ * SCK -> 13
+ * SDA -> pinSDA(default 10)
+ * LED_GREEN, LED_RED, ONSOLVE_PIN connect according to needs*/
+#define DUMPCARDID false // set to true to print found card id in serial monitor, set to false for normal operation
+#define ONSOLVE_PIN 6 // pin to change state when correct card is detected.
 #define ONSOLVE_STATE LOW // state to set on ONSOLVE_PIN when correct card is deteced
 #define LED_RED 8 // will blink on incorrect card
 #define LED_GREEN 7 // will turn on on correct card
 #define LED_COMMON_GND true // set to true if both LEDs are connected to common ground. In such case HIGH will be put on respective pins.
 #define CORRECT_CARDS_COUNT  2 // change when adding new cards
 void onCorrectCard();
-const uint32_t correctCardIDs[] = {0x89DE04B7}; // input in hexadecimal
+void onIncorrectCard();
+const uint32_t correctCardIDs[] = {0x89DE04B7, 0x2B4EE860}; // input in hexadecimal
 const int pinRST = 9;
 const int pinSDA = 10;
 MFRC522 mfrc522(pinSDA, pinRST); 
@@ -18,10 +27,11 @@ void setup() {
   SPI.begin(); 
   mfrc522.PCD_Init(); 
   Serial.begin(9600); 
+  Serial.println("Hello world!");
   pinMode(ONSOLVE_PIN,OUTPUT);
   pinMode(LED_RED,OUTPUT);
   pinMode(LED_GREEN,OUTPUT);
-  digitalWrite(LED_RED, LED_COMMON_GND?LOW:HIGH);
+  digitalWrite(LED_RED, LED_COMMON_GND?HIGH:LOW);
   digitalWrite(LED_GREEN, LED_COMMON_GND?LOW:HIGH);
   digitalWrite(ONSOLVE_PIN, !ONSOLVE_STATE);
 }
@@ -50,12 +60,14 @@ void loop() {
 }
 void onCorrectCard()
 {
-  Serial.println("Correct!");
+  //Serial.println("Correct!");
   digitalWrite(LED_GREEN, LED_COMMON_GND?HIGH:LOW);
   digitalWrite(ONSOLVE_PIN, ONSOLVE_STATE);
+  digitalWrite(LED_RED, LED_COMMON_GND?LOW:HIGH);
 }
 void onIncorrectCard()
 {
+  // blink led
   digitalWrite(LED_RED, LED_COMMON_GND?HIGH:LOW);  
   delay(100);
   digitalWrite(LED_RED, LED_COMMON_GND?!HIGH:!LOW);  

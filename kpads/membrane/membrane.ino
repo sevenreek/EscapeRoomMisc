@@ -6,9 +6,13 @@
 #define LED_GREEN 9
 #define LED_RED 10
 #define BLINK_COUNT 4
-#define BLINK_DELAY 166
+#define BLINK_DELAY 100
+#define ONSOLVE_PIN 11 // pin to change state when correct card is detected.
+#define ONSOLVE_STATE LOW // state to set on ONSOLVE_PIN when correct card is deteced
+#define DEBUG false
 void clearCode(char * code);
 bool isCodeCorrect(char* code);
+void onPuzzleIncorrect();
 void onPuzzleFinished();
 const byte rows = 4; //four rows
 const byte cols = 3; //three columns
@@ -29,12 +33,19 @@ void setup() {
   pinMode(LED_GREEN, OUTPUT);
   code = (char*)malloc(CODE_LENGTH*sizeof(char));
   clearCode(code);
+  #if DEBUG == true
   Serial.begin(9600);
+  digitalWrite(LED_RED,HIGH);
+  digitalWrite(LED_GREEN,LOW);
+  pinMode(ONSOLVE_PIN, OUTPUT);
+  #endif
 }
 
 void loop() {
   char next = keypad.waitForKey();
+  #if DEBUG == true
   Serial.print(next);
+  #endif
   code[currentDigit++] = next;
   if(currentDigit>=CODE_LENGTH)
   {
@@ -61,15 +72,19 @@ void onPuzzleIncorrect()
 {
   for(int i = 0; i<BLINK_COUNT; i++)
   {
-    digitalWrite(LED_RED,HIGH);
-    delay(BLINK_DELAY/2);
     digitalWrite(LED_RED,LOW);
+    delay(BLINK_DELAY/2);
+    digitalWrite(LED_RED,HIGH);
     delay(BLINK_DELAY/2);
   }
 }
 
 void onPuzzleFinished()
 {
+  #if DEBUG == true
   Serial.println("VICTORY!");
+  #endif
   digitalWrite(LED_GREEN,HIGH);
+  digitalWrite(LED_RED,LOW);
+  digitalWrite(ONSOLVE_PIN, ONSOLVE_STATE);
 }

@@ -1,5 +1,5 @@
 #include "SoundPlayer.h"
-SoundController::SoundController(SoftwareSerial softSerial)
+SoundController::SoundController(NeoSWSerial softSerial)
 {
   if(!(this->myDFPlayer.begin(softSerial)))
   {
@@ -9,7 +9,7 @@ SoundController::SoundController(SoftwareSerial softSerial)
 }
 SoundController::SoundController(int RXpin, int TXpin, unsigned int baudrate)
 {
-  SoftwareSerial softSerial(RXpin,TXpin);
+  NeoSWSerial softSerial(RXpin,TXpin);
   softSerial.begin(baudrate);
   if(!(this->myDFPlayer.begin(softSerial)))
   {
@@ -23,7 +23,8 @@ void SoundController::play(uint16_t number)
 }
 void SoundController::playLoop(uint16_t number)
 {
-  this->myDFPlayer.loop(number);
+  Serial.println("playLoop");delay(100);
+  this->myDFPlayer.loop(number);delay(100);Serial.println("playLoop return");delay(100);
 }
 void SoundController::volume(uint8_t number)
 {

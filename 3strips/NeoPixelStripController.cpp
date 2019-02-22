@@ -1,7 +1,8 @@
 #include <Adafruit_NeoPixel.h> 
 
-#define DEBOUNCE_TIME 2000
-#define STATE_COUNT 3
+#define DEBOUNCE_TIME 200
+#define STATE_COUNT 3 
+#define PIN_RGB_ON_STATE LOW // stan wlaczajacy tasme na danym pinie
 enum StripState {
 	RUN_RIGHT,
 	RUN_LEFT,
@@ -12,19 +13,23 @@ class NeoPixelStripController {
 private:
 	StripState stripState;
 	Adafruit_NeoPixel * LEDStrip;
-	unsigned long lastInterruptTime;
+	unsigned volatile long lastInterruptTime;
 	uint32_t stripColor;
 	int lastLitRelative;
 	int rightStopPixel;
 	int leftStopPixel;
 	int leftRightGap;
 	int pixelCount;
+  bool isZeroState;  
+  unsigned char onPin;
 public:
-	NeoPixelStripController(Adafruit_NeoPixel * strip, uint32_t stripColor, unsigned int pixelCount)
+	NeoPixelStripController(Adafruit_NeoPixel * strip, uint32_t stripColor, unsigned int pixelCount, unsigned char onPin)
 	{
 		this->stripColor = stripColor;
 		this->LEDStrip = strip;
 		this->pixelCount = pixelCount;
+    this->onPin = onPin;
+    this->isZeroState = true;
 		lastInterruptTime = 0;
 		lastLitRelative = -1;
 		stripState = RUN_RIGHT;
@@ -36,10 +41,18 @@ public:
 	void init()
 	{
 		LEDStrip->begin();
+    LEDStrip->clear();
 		LEDStrip->show();
 	}
 	void updateStrip()
 	{
+    if(digitalRead(onPin) != PIN_RGB_ON_STATE) // jesli tasma jest wylaczona to nie przyjmujemy zadnych polecen ani nie aktualizujemy tasmy
+    {  
+      if(!this->isZeroState)
+        reset();
+      return;
+    }
+    this->isZeroState = false;
 		switch(stripState)
 		{
 			case RUN_RIGHT:
@@ -52,9 +65,9 @@ public:
 						//Serial.print(relativeToLight); Serial.print("%"); Serial.print(leftRightGap); Serial.print("\n");
 						relativeToLight %= (leftRightGap+1);
 				}
-				uint32_t clr = LEDStrip->Color(255,0,0);
+
 				//Serial.print("Lighting "); Serial.print(leftStopPixel+relativeToLight); Serial.print(" with "); Serial.print(stripColor); Serial.print("\n"); 
-				LEDStrip->setPixelColor(leftStopPixel+relativeToLight,clr);
+				LEDStrip->setPixelColor(leftStopPixel+relativeToLight,stripColor);
 				LEDStrip->show();
 				lastLitRelative = relativeToLight;
 				break;
@@ -79,10 +92,31 @@ public:
 			
 		}
 	}
+  void reset()
+  {
+    leftStopPixel = 0;
+    rightStopPixel = pixelCount-1;
+    lastLitRelative = -1;
+    leftRightGap = rightStopPixel - leftStopPixel;
+    LEDStrip->clear();
+    LEDStrip->show();
+    this->stripState = RUN_RIGHT;
+    this->isZeroState = true;
+  }
 	void handleIRQ()
 	{
+    if(digitalRead(onPin) != PIN_RGB_ON_STATE) // jesli tasma jest wylaczona to nie przyjmujemy zadnych polecen ani nie aktualizujemy tasmy
+    {  
+      if(!this->isZeroState)
+        reset();
+      return;
+    }
+    this->isZeroState = false;
 		if ((millis() - lastInterruptTime) < DEBOUNCE_TIME)
+    {
 			return;
+    }
+    lastInterruptTime = millis();
 		switch(stripState)
 		{
 			case RUN_RIGHT:
@@ -99,6 +133,10 @@ public:
 				leftStopPixel = rightStopPixel - lastLitRelative;
 				leftRightGap = rightStopPixel-leftStopPixel;
 				lastLitRelative = leftStopPixel - 1;
+        LEDStrip->clear();
+        for(int i = leftStopPixel; i <= rightStopPixel; i++)
+          LEDStrip->setPixelColor(i,stripColor);
+        LEDStrip->show();
 				Serial.print("IRQ IN RUN_LEFT! RIGHT: "); Serial.print(rightStopPixel); Serial.print(" LEFT: "); Serial.print(leftStopPixel); Serial.print(" LAST LIT:"); Serial.print(lastLitRelative); Serial.print("\n"); 
 				break;
 			}

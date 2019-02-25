@@ -14,4 +14,6 @@ class SoundController {
   void play(uint16_t number);
   void playLoop(uint16_t number);
   void volume(uint8_t number);
+  void pause();
+  void resume();
 };

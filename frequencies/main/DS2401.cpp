@@ -13,17 +13,14 @@ DS2401::DS2401(int dataPin)
 }
 char DS2401::readData(byte * data)
 {
-  Serial.println("Entered function");
   if(onewire->reset())
   {
-    Serial.println("Writing command");
-    onewire->write(READ_COMMAND);
-    for(volatile byte i = 0; i<8; i++)
+    onewire->write(READ_COMMAND, 1);
+    for(byte i = 0; i<8; i++)
     {
       data[i] = onewire->read();
       Serial.print(data[i],HEX);
     }
-    Serial.println();
     #if VERIFY_CRC == true
     if(data[7]== OneWire::crc8(data,7))
       return RESULT_SUCCESS;

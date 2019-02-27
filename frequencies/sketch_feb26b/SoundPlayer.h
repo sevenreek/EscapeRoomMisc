@@ -2,15 +2,14 @@
 #define ARDUINO_H
 #include "Arduino.h"
 #endif
-#include <NeoSWSerial.h>
+#include <SoftwareSerial.h>
 #include "DFPlayerMini_Fast.h"
 
 class SoundController {
   private:
-  DFPlayerMini_Fast * myDFPlayer;
-  NeoSWSerial * softSerial;
+  DFPlayerMini_Fast myDFPlayer;
   public:
-  SoundController(NeoSWSerial softSerial);
+  SoundController(SoftwareSerial softSerial);
   SoundController(int RXpin, int TXpin, unsigned int baudrate);
   void play(uint16_t number);
   void playLoop(uint16_t number);

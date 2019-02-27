@@ -1,18 +1,12 @@
 #include "DS2401.h"
-/*class DS2401 {
-  private:
-  OneWire * onewire;
-  public:
-  DS2401(int dataPin);
-  bool readData(byte* data);
-};
-*/
 DS2401::DS2401(int dataPin)
 {
   this->onewire = new OneWire(dataPin);
 }
-uint8_t DS2401::readData(volatile byte* data)
+uint8_t DS2401::readData(volatile byte * data)
 {
+  if(!data)
+    return RESULT_NOPOINTER;
   if(onewire->reset())
   {
     onewire->write(READ_COMMAND,1);
@@ -30,19 +24,4 @@ uint8_t DS2401::readData(volatile byte* data)
     #endif
   }
   return RESULT_FAILURE;
-}
-
-bool DS2401::isCorrectDS2401Connected(const byte* correctSignature)
-{
-  byte data[8];
-  if(this->readData(data) == RESULT_SUCCESS)
-  {
-    if(memcmp(data,correctSignature,8) == 0)
-      return true;
-    else
-      return false; 
-  }
-  else
-    return false; // if DS2401 is not found return false.
-  
 }
